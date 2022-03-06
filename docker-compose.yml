@@ -1,0 +1,62 @@
+#Versao do arquivo docker-compose
+version: "3.8"
+
+#Servicos
+services:
+  #Nome de indentificacao do servico, pode colocar outro se necessario
+  db:
+    #imagem de origem
+    image: mariadb:10.8
+    #Nome do container
+    container_name: database
+    #parametros para configuracao
+    environment:
+      - MARIADB_USER=root
+      #- MARIADB_PASSWORD=1234
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
+      - MARIADB_DATABASE=php-database
+    #Porta de Comunicacao Local > Container
+    ports:
+      - 8010:3306
+    #Caminho da pasta local para armazenar os dados (./ seria o caminho atual do arquivo docker-compose)
+    volumes:
+      - /dev_app/db_data:/var/lib/mysql
+
+  app74:
+    #Imagem de origem
+    image: kelvinsev/webserver-php74:1.0
+    #Nome do container
+    container_name: webserver-php74
+    #Caminho da pasta local para armazenar os dados (./ seria o caminho atual do arquivo docker-compose)
+    volumes:
+      - /dev_app/php74:/var/www/html/php74
+    #Porta de Comunicacao Local > Container
+    ports:
+      - 8074:80
+    #Gera link de comunicacao com o database acima
+    links:
+      - db
+    #Para instalar o app, depende da finalizacao do db
+    depends_on:
+      - db
+    tty: true
+
+  app81:
+    #Imagem de origem
+    image: kelvinsev/webserver-php81:1.0
+    #Nome do container
+    container_name: webserver-php81
+    #Caminho da pasta local para armazenar os dados (./ seria o caminho atual do arquivo docker-compose)
+    volumes:
+      - /dev_app/php81:/var/www/html/php81
+    #Porta de Comunicacao Local > Container
+    ports:
+      - 8081:80
+    #Gera link de comunicacao com o database acima
+    links:
+      - db
+      - app74
+    #Para instalar o app, depende da finalizacao do db
+    depends_on:
+      - db
+    tty: true
